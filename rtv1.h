@@ -1,17 +1,38 @@
 #ifndef __RTV1
 # define __RTV1
 
-# include "SDL2/SDL2.framework/Headers/SDL.h"
+//# include "SDL2/SDL2.framework/Headers/SDL.h"
+# include <SDL.h>
 # include <stdlib.h>
-# include <unistd.h>
+//# include <unistd.h>
 # include <fcntl.h>
 # include <math.h>
 
-# define WINDOW_W 700
-# define WINDOW_H 700
+# define WINDOW_W 300
+# define WINDOW_H 300
 # define CAMERA_W 100
 # define CAMERA_H 100
 # define CAMERA_FOV_DISTANCE 1
+
+typedef struct	s_vector
+{
+	float	x;
+	float	y;
+	float	z;
+}				t_vector;
+
+typedef struct	s_variables1
+{
+	float		k1;
+	float		k2;
+	float		k3;
+	float		t1;
+	float		t2;
+	float		len1;
+	float		len2;
+	t_vector	p1;
+	t_vector	p2;
+}				t_variables1;
 
 typedef struct	s_sphere
 {
@@ -24,7 +45,8 @@ typedef struct	s_sphere
 typedef struct	s_objects
 {
 	void	*obj;
-	int		type; // 0 - sphere
+	int		color;
+	char	type; // 0 - sphere
 }				t_objects;
 
 typedef struct	s_camera
@@ -32,17 +54,26 @@ typedef struct	s_camera
 	int		x;
 	int		y;
 	int		z;
-	int		rx;
-	int		ry;
-	int		rz;
+	float	rx;
+	float	ry;
+	//float	rz;
 }				t_camera;
+
+typedef struct	s_scene
+{
+	int			obj_count;
+	t_objects	*o;
+}				t_scene;
 
 typedef struct	s_rtv1
 {
 	SDL_Window	*win;
 	SDL_Surface	*sur;
 	char		quit;
-	t_objects	*o;
 	t_camera	cam;
+	t_scene		s;
+	int			i;
+	int			j;
+	int			color;
 }				t_rtv1;
 #endif
