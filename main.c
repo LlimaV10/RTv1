@@ -202,6 +202,8 @@ float	get_sphere_len(t_rtv1 *iw, t_sphere *sphere)
 		return (-1.0f);
 	k.t1 = (-k.k2 + sqrtf(discriminant)) / (2.0f * k.k1);
 	k.t2 = (-k.k2 - sqrtf(discriminant)) / (2.0f * k.k1);
+	if (k.t1 > -1.0f || k.t2 > -1.0f)
+		return (-1.0f);
 	k.p1.x = (float)iw->cam.x + k.t1 * d.x;
 	k.p1.y = (float)iw->cam.y + k.t1 * d.y;
 	k.p1.z = (float)iw->cam.z + k.t1 * d.z;
