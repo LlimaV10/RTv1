@@ -153,7 +153,7 @@ void	get_scene1(t_rtv1 *iw)
 	iw->s.l[0].x = 10;
 	iw->s.l[0].y = 10;
 	iw->s.l[0].z = 40;
-	iw->s.l[0].strength = 0.5f;
+	iw->s.l[0].strength = 0.9f;
 }
 
 void	multiply_vector_and_rotation_matrix(t_rtv1 *iw, t_vector *v)
@@ -213,9 +213,10 @@ float	get_sphere_len(t_rtv1 *iw, t_sphere *sphere)
 	return ((k.len1 < k.len2) ? k.len1 : k.len2);
 }
 
-int		get_light_color(t_rtv1 *iw, int color, int obj)
+int		get_light_color(t_rtv1 *iw, int color)
 {
 	float	strength;
+	float	tmp;
 	float	len;
 	int		i;
 
@@ -225,8 +226,19 @@ int		get_light_color(t_rtv1 *iw, int color, int obj)
 	{
 		len = sqrtf(powf(iw->p.x - iw->s.l[i].x, 2.0f) + powf(iw->p.y - iw->s.l[i].y, 2.0f)
 			+ powf(iw->p.z - iw->s.l[i].z, 2.0f));
-		strength += iw->s.l[i].strength;
+		//printf("len %f\n", len);
+		tmp = iw->s.l[i].strength - (len / 1000.0f);
+		if (tmp > 0.0f)
+			strength += tmp;
 	}
+	if (strength > 1.0f)
+		strength = 1.0f;
+	i = (((int)((float)(color >> 16) * strength)) << 16) +
+		(((int)((float)((color >> 8) - (color >> 16 << 8)) * strength)) << 8)+
+		(int)((float)(color - (color >> 8 << 8)) * strength);
+	//printf("%X %X\n", color, (int)((float)(0xFFFFFF - (0xFFFFFF >> 8 << 8)) * strength));
+	//printf("%X\n", 0x1900);
+	return (i);
 }
 
 void	put_pixel_from_scene(t_rtv1 *iw)
@@ -247,7 +259,7 @@ void	put_pixel_from_scene(t_rtv1 *iw)
 				if (len < minlen || minlen < 0.0f)
 				{
 					minlen = len;
-					color = iw->s.o[i].color;
+					color = get_light_color(iw, iw->s.o[i].color);//iw->s.o[i].color;
 				}
 		}
 	}
@@ -302,7 +314,7 @@ int		main(void)
 {
 	t_rtv1	iw;
 
-	printf("%d\n", 0x00FF00 >> 8);
+	printf("%d\n", 0x01FF00 >> 8);
 	SDL_Init(SDL_INIT_EVERYTHING);
 	//SDL_SetRelativeMouseMode(0);
 	iw.win = SDL_CreateWindow("RTv1", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
