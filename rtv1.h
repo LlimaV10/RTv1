@@ -59,10 +59,20 @@ typedef struct	s_camera
 	//float	rz;
 }				t_camera;
 
+typedef struct	s_point_light
+{
+	int		x;
+	int		y;
+	int		z;
+	float	strength;
+}				t_point_light;
+
 typedef struct	s_scene
 {
-	int			obj_count;
-	t_objects	*o;
+	int				obj_count;
+	t_objects		*o;
+	int				light_count;
+	t_point_light	*l;
 }				t_scene;
 
 typedef struct	s_rtv1
@@ -77,5 +87,6 @@ typedef struct	s_rtv1
 	int			end;
 	int			j;
 	int			color;
+	t_vector	p;
 }				t_rtv1;
 #endif
