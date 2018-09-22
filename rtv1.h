@@ -7,11 +7,11 @@
 //# include <unistd.h>
 # include <fcntl.h>
 # include <math.h>
-
+# define HAVE_STRUCT_TIMESPEC
+# include <pthread.h>
 # define WINDOW_W 300
 # define WINDOW_H 300
-# define CAMERA_W 100
-# define CAMERA_H 100
+# define THREADS 4
 # define CAMERA_FOV_DISTANCE 1
 
 typedef struct	s_vector
@@ -73,6 +73,8 @@ typedef struct	s_rtv1
 	t_camera	cam;
 	t_scene		s;
 	int			i;
+	int			st;
+	int			end;
 	int			j;
 	int			color;
 }				t_rtv1;

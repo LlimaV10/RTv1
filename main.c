@@ -255,6 +255,39 @@ void	draw(t_rtv1 *iw)
 	}
 }
 
+void	threads_draw2(t_rtv1 *iw)
+{
+	iw->i = iw->st - 1;
+	while (++iw->i < iw->end)
+	{
+		iw->j = -1;
+		while (++iw->j < WINDOW_H)
+			put_pixel_from_scene(iw);
+	}
+}
+
+void	threads_draw(t_rtv1 *iw)
+{
+	pthread_t	threads[THREADS];
+	t_rtv1		iws[THREADS];
+	int			i;
+	int			j;
+
+	i = -1;
+	j = 0;
+	while (++i < THREADS)
+	{
+		iws[i] = *iw;
+		iws[i].st = j;
+		j += WINDOW_W / THREADS;
+		iws[i].end = j;
+		pthread_create(&threads[i], NULL,
+			(void *(*)(void *))threads_draw2, (void *)&iws[i]);
+	}
+	while (i-- > 0)
+		pthread_join(threads[i], (void **)&iws[i]);
+}
+
 int		main(void)
 {
 	t_rtv1	iw;
@@ -265,7 +298,7 @@ int		main(void)
 		WINDOW_W, WINDOW_H, SDL_WINDOW_SHOWN);
 	iw.sur = SDL_GetWindowSurface(iw.win);
 	get_scene1(&iw);
-	draw(&iw);
+	threads_draw(&iw);
 	SDL_UpdateWindowSurface(iw.win);
 	main_loop(&iw);
 	SDL_FreeSurface(iw.sur);
