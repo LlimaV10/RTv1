@@ -35,18 +35,19 @@ void	exit_x(t_rtv1 *iw)
 
 void	draw(t_rtv1 *iw);
 void	multiply_vector_and_rotation_matrix(t_rtv1 *iw, t_vector *v);
+void	threads_draw(t_rtv1 *iw);
 
 void	update_int(t_rtv1 *iw, int *change, int i)
 {
 	*change += i;
-	draw(iw);
+	threads_draw(iw);
 	SDL_UpdateWindowSurface(iw->win);
 }
 
 void	update_float(t_rtv1 *iw, float *change, float i)
 {
 	*change += i;
-	draw(iw);
+	threads_draw(iw);
 	SDL_UpdateWindowSurface(iw->win);
 }
 
@@ -69,7 +70,7 @@ void	update_vector(t_rtv1 *iw, int bol, float i)
 	iw->cam.x += (int)(v.x);
 	iw->cam.y += (int)(v.y);
 	iw->cam.z += (int)(v.z);
-	draw(iw);
+	threads_draw(iw);
 	SDL_UpdateWindowSurface(iw->win);
 }
 
@@ -133,38 +134,106 @@ void	main_loop(t_rtv1 *iw)
 void	get_scene1(t_rtv1 *iw)
 {
 	t_sphere		*tmp;
+	t_plane			*tmp2;
 
-	iw->cam.x = -5;
+	iw->cam.x = 0;
 	iw->cam.y = 0;
-	iw->cam.z = 20;
-	iw->cam.rx = 0.174533f;
-	iw->cam.ry = 0.174533f;
+	iw->cam.z = -40;
+	iw->cam.rx = 0.0f;
+	iw->cam.ry = 0.0f;
+	iw->cam.light = 0.1f;
 	//iw->cam.rz = 0;
-	iw->s.obj_count = 2;
+	iw->s.obj_count = 8;
 	iw->s.o = (t_objects *)malloc(iw->s.obj_count * sizeof(t_objects));
 	tmp = (t_sphere *)malloc(sizeof(t_sphere));
 	tmp->x = 0;
 	tmp->y = 0;
 	tmp->z = 50;
-	tmp->r = 5;
+	tmp->r = 20;
 	iw->s.o[0].obj = (void *)tmp;
 	iw->s.o[0].type = 0;
 	iw->s.o[0].color = 0x00FF00;
 
 	tmp = (t_sphere *)malloc(sizeof(t_sphere));
-	tmp->x = 10;
+	tmp->x = 0;
 	tmp->y = 0;
-	tmp->z = 50;
-	tmp->r = 7;
+	tmp->z = 30;
+	tmp->r = 3;
 	iw->s.o[1].obj = (void *)tmp;
 	iw->s.o[1].type = 0;
 	iw->s.o[1].color = 0xFF0000;
+
+	tmp2 = (t_plane *)malloc(sizeof(t_plane));
+	tmp2->p0.x = 0;
+	tmp2->p0.y = 0;
+	tmp2->p0.z = 150;
+	tmp2->n.x = 0;
+	tmp2->n.y = 0;
+	tmp2->n.z = 1;
+	iw->s.o[2].obj = (void *)tmp2;
+	iw->s.o[2].type = 1;
+	iw->s.o[2].color = 0xFFFF00;
+
+	tmp2 = (t_plane *)malloc(sizeof(t_plane));
+	tmp2->p0.x = 80;
+	tmp2->p0.y = 0;
+	tmp2->p0.z = 0;
+	tmp2->n.x = 1;
+	tmp2->n.y = 0;
+	tmp2->n.z = 0;
+	iw->s.o[3].obj = (void *)tmp2;
+	iw->s.o[3].type = 1;
+	iw->s.o[3].color = 0x0000FF;
+
+	tmp2 = (t_plane *)malloc(sizeof(t_plane));
+	tmp2->p0.x = -80;
+	tmp2->p0.y = 0;
+	tmp2->p0.z = 0;
+	tmp2->n.x = -1;
+	tmp2->n.y = 0;
+	tmp2->n.z = 0;
+	iw->s.o[4].obj = (void *)tmp2;
+	iw->s.o[4].type = 1;
+	iw->s.o[4].color = 0x0000FF;
+
+	tmp2 = (t_plane *)malloc(sizeof(t_plane));
+	tmp2->p0.x = 0;
+	tmp2->p0.y = 80;
+	tmp2->p0.z = 0;
+	tmp2->n.x = 0;
+	tmp2->n.y = 1;
+	tmp2->n.z = 0;
+	iw->s.o[5].obj = (void *)tmp2;
+	iw->s.o[5].type = 1;
+	iw->s.o[5].color = 0x00FFFF;
+
+	tmp2 = (t_plane *)malloc(sizeof(t_plane));
+	tmp2->p0.x = 0;
+	tmp2->p0.y = -80;
+	tmp2->p0.z = 0;
+	tmp2->n.x = 0;
+	tmp2->n.y = -1;
+	tmp2->n.z = 0;
+	iw->s.o[6].obj = (void *)tmp2;
+	iw->s.o[6].type = 1;
+	iw->s.o[6].color = 0x00FFFF;
+
+	tmp2 = (t_plane *)malloc(sizeof(t_plane));
+	tmp2->p0.x = 0;
+	tmp2->p0.y = 0;
+	tmp2->p0.z = -200;
+	tmp2->n.x = 0;
+	tmp2->n.y = 0;
+	tmp2->n.z = -1;
+	iw->s.o[7].obj = (void *)tmp2;
+	iw->s.o[7].type = 1;
+	iw->s.o[7].color = 0xFFFF00;
 
 	iw->s.light_count = 1;
 	iw->s.l = (t_point_light *)malloc(iw->s.light_count * sizeof(t_point_light));
 	iw->s.l[0].x = 20;
 	iw->s.l[0].y = 20;
-	iw->s.l[0].z = 50;
+	iw->s.l[0].z = 35;
 	iw->s.l[0].strength = 1.0f;
 	/*iw->s.l[1].x = -20;
 	iw->s.l[1].y = 0;
@@ -200,37 +269,63 @@ float	get_sphere_len2(t_rtv1 *iw, t_variables1 *k, t_vector *d)
 		+ powf((float)iw->cam.z - k->p2.z, 2.0f));
 }
 
-float	get_sphere_len(t_rtv1 *iw, t_sphere *sphere)
+float	get_sphere_len(t_rtv1 *iw, t_sphere *sphere, t_vector *d)
 {
-	t_vector		d;
 	t_vector		oc;
 	t_variables1	k;
 	float			discriminant;
 
-	d.x = (float)((iw->i - WINDOW_W / 2) * CAMERA_FOV_DISTANCE) / (float)WINDOW_W;
-	d.y = (float)((iw->j - WINDOW_H / 2) * CAMERA_FOV_DISTANCE) / (float)WINDOW_H;
-	d.z = (float)(CAMERA_FOV_DISTANCE);
-	multiply_vector_and_rotation_matrix(iw, &d);
-	k.k1 = d.x * d.x + d.y * d.y + d.z * d.z;
+	k.k1 = d->x * d->x + d->y * d->y + d->z * d->z;
 	oc.x = (float)(sphere->x - iw->cam.x);
 	oc.y = (float)(sphere->y - iw->cam.y);
 	oc.z = (float)(sphere->z - iw->cam.z);
-	k.k2 = 2.0f * (oc.x * d.x + oc.y * d.y + oc.z * d.z);
+	k.k2 = 2.0f * (oc.x * d->x + oc.y * d->y + oc.z * d->z);
 	k.k3 = (oc.x * oc.x + oc.y * oc.y + oc.z * oc.z) - (float)(sphere->r * sphere->r);
 	discriminant = k.k2 * k.k2 - 4.0f * k.k1 * k.k3;
 	if (discriminant < 0.0f)
 		return (-1.0f);
 	k.t1 = (-k.k2 + sqrtf(discriminant)) / (2.0f * k.k1);
 	k.t2 = (-k.k2 - sqrtf(discriminant)) / (2.0f * k.k1);
-	/*if (k.t1 > -1.0f || k.t2 > -1.0f)
-		return (-1.0f);*/
-	get_sphere_len2(iw, &k, &d);
+	if (k.t1 > -1.0f || k.t2 > -1.0f)
+		return (-1.0f);
+	get_sphere_len2(iw, &k, d);
 	iw->p = (k.len1 < k.len2) ? k.p1 : k.p2;
 	iw->p.x = -iw->p.x + (float)(iw->cam.x * 2);
 	iw->p.y = iw->p.y - (float)(iw->cam.y * 2);
 	iw->p.z = -iw->p.z + (float)(iw->cam.z * 2);
-//	printf("px %f py %f pz %f\n", iw->p.x, iw->p.y, iw->p.z);
 	return ((k.len1 < k.len2) ? k.len1 : k.len2);
+}
+
+float	get_plane_len(t_rtv1 *iw, t_plane *plane, t_vector *d)
+{
+	float			t;
+	t_int_vector	p0l0;
+
+	p0l0.x = -plane->p0.x + iw->cam.x;
+	p0l0.y = -plane->p0.y + iw->cam.y;
+	p0l0.z = -plane->p0.z + iw->cam.z;
+	t = (float)(-(p0l0.x * plane->n.x + p0l0.y * plane->n.y + p0l0.z * plane->n.z)) /
+		(float)(d->x * (float)plane->n.x + d->y * (float)plane->n.y + d->z * (float)plane->n.z);
+	if (t < 0)
+		return (-1.0f);
+	iw->p.x = (float)iw->cam.x + d->x * t;
+	iw->p.y = (float)iw->cam.y + d->y * t;
+	iw->p.z = (float)iw->cam.z + d->z * t;
+	return (sqrtf(powf((float)iw->cam.x - iw->p.x, 2.0f) + powf((float)iw->cam.y - iw->p.y, 2.0f)
+		+ powf((float)iw->cam.z - iw->p.z, 2.0f)));
+	//printf("pt.x = (float)((plane->p0.x - iw->cam.x) * plane->n.x) / (d->x * (float)plane->n.x);
+	// t.y = (float)((plane->p0.y - iw->cam.y) * plane->n.y) / (d->y * (float)plane->n.y);
+	// t.z = (float)((plane->p0.z - iw->cam.z) * plane->n.z) / (d->z * (float)plane->n.z);
+	// //printf("tx %f ty %f tz %f\n", t.x, t.y, t.z);
+	// iw->p.x = (float)iw->cam.x + d->x * t.x;
+	// iw->p.y = (float)iw->cam.y + d->y * t.y;
+	// iw->p.z = (float)iw->cam.z + d->z * t.z;0x %d p0y %d p0z %d\n", plane->p0.x, plane->p0.y, plane->p0.z);
+	// 
+	//printf("px %f py %f pz %f\n", iw->p.x, iw->p.y, iw->p.z);
+	//printf("%f\n", sqrtf(powf((float)iw->cam.x - iw->p.x, 2.0f) + powf((float)iw->cam.y - iw->p.y, 2.0f)
+	// 	//+powf((float)iw->cam.z - iw->p.z, 2.0f)));
+	// return (sqrtf(powf((float)iw->cam.x - iw->p.x, 2.0f) + powf((float)iw->cam.y - iw->p.y, 2.0f)
+	// 	+powf((float)iw->cam.z - iw->p.z, 2.0f)));
 }
 
 float	get_min_max_len(t_rtv1 *iw, int obj, float *maxlen, int light)
@@ -251,7 +346,6 @@ float	get_min_max_len(t_rtv1 *iw, int obj, float *maxlen, int light)
 int		get_light_color(t_rtv1 *iw, int color, int obj)
 {
 	float	strength;
-//	float	tmp;
 	float	len;
 	float	minlen;
 	float	maxlen;
@@ -261,35 +355,40 @@ int		get_light_color(t_rtv1 *iw, int color, int obj)
 	i = -1;
 	while (++i < iw->s.light_count)
 	{
-		minlen = get_min_max_len(iw, obj, &maxlen, i);
-		len = sqrtf(powf(iw->p.x - iw->s.l[i].x, 2.0f) + powf(iw->p.y - iw->s.l[i].y, 2.0f)
-			+ powf(iw->p.z - iw->s.l[i].z, 2.0f));
-		//printf("max %f min %f len %f\n", maxlen, minlen, len);
-		//printf("px %f, py %f, pz %f\n", iw->p.x, iw->p.y, iw->p.z);
-		strength += (maxlen - len) / (maxlen - minlen) * iw->s.l[i].strength;
-		/*tmp = iw->s.l[i].strength - (len / 1000.0f);
-		if (tmp > 0.0f)
-			strength += tmp;*/
+		if (iw->s.o[obj].type == 1)
+		{
+
+		}
+		else
+		{
+			minlen = get_min_max_len(iw, obj, &maxlen, i);
+			len = sqrtf(powf(iw->p.x - iw->s.l[i].x, 2.0f) + powf(iw->p.y - iw->s.l[i].y, 2.0f)
+				+ powf(iw->p.z - iw->s.l[i].z, 2.0f));
+			strength += (maxlen - len) / (maxlen - minlen) * iw->s.l[i].strength;
+		}
 	}
-	if (strength < 0.1f) ////////
-		strength = 0.1f;
+	if (strength < iw->cam.light) ////////
+		strength = iw->cam.light;
 	if (strength > 1.0f)
 		return(color);
 	i = (((int)((float)(color >> 16) * strength)) << 16) +
 		(((int)((float)((color >> 8) - (color >> 16 << 8)) * strength)) << 8)+
 		(int)((float)(color - (color >> 8 << 8)) * strength);
-	//printf("%X %X\n", color, (int)((float)(0xFFFFFF - (0xFFFFFF >> 8 << 8)) * strength));
-	//printf("%X\n", 0x1900);
 	return (i);
 }
 
 void	put_pixel_from_scene(t_rtv1 *iw)
 {
-	int		i;
-	int		color;
-	float	minlen;
-	float	len;
+	int			i;
+	int			color;
+	float		minlen;
+	float		len;
+	t_vector	d;
 
+	d.x = (float)((iw->i - WINDOW_W / 2) * CAMERA_FOV_DISTANCE) / (float)WINDOW_W;
+	d.y = (float)((iw->j - WINDOW_H / 2) * CAMERA_FOV_DISTANCE) / (float)WINDOW_H;
+	d.z = (float)(CAMERA_FOV_DISTANCE);
+	multiply_vector_and_rotation_matrix(iw, &d);
 	color = 0;
 	minlen = -1.0f;
 	i = -1;
@@ -297,11 +396,20 @@ void	put_pixel_from_scene(t_rtv1 *iw)
 	{
 		if (iw->s.o[i].type == 0)
 		{
-			if ((len = get_sphere_len(iw, (t_sphere *)(iw->s.o[i].obj))) > 0.0f)
+			if ((len = get_sphere_len(iw, (t_sphere *)(iw->s.o[i].obj), &d)) > 0.0f)
 				if (len < minlen || minlen < 0.0f)
 				{
 					minlen = len;
 					color = get_light_color(iw, iw->s.o[i].color, i);//iw->s.o[i].color;
+				}
+		}
+		else if (iw->s.o[i].type == 1)
+		{
+			if ((len = get_plane_len(iw, (t_plane *)(iw->s.o[i].obj), &d)) > 0.0f)
+				if (len < minlen || minlen < 0.0f)
+				{
+					minlen = len;
+					color = iw->s.o[i].color;//get_light_color(iw, iw->s.o[i].color, i);//
 				}
 		}
 	}
@@ -356,7 +464,6 @@ int		main(void)
 {
 	t_rtv1	iw;
 
-	printf("%d\n", 0x01FF00 >> 8);
 	SDL_Init(SDL_INIT_EVERYTHING);
 	//SDL_SetRelativeMouseMode(0);
 	iw.win = SDL_CreateWindow("RTv1", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
