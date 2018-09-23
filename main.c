@@ -12,8 +12,20 @@ void set_pixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
 	}
 }
 
+void	free_objects_lights(t_rtv1 *iw)
+{
+	int		i;
+
+	i = -1;
+	while (++i < iw->s.obj_count)
+		free(iw->s.o[i].obj);
+	free(iw->s.o);
+	free(iw->s.l);
+}
+
 void	exit_x(t_rtv1 *iw)
 {
+	free_objects_lights(iw);
 	SDL_FreeSurface(iw->sur);
 	SDL_DestroyWindow(iw->win);
 	SDL_Quit();
@@ -122,9 +134,9 @@ void	get_scene1(t_rtv1 *iw)
 {
 	t_sphere		*tmp;
 
-	iw->cam.x = 0;
+	iw->cam.x = -5;
 	iw->cam.y = 0;
-	iw->cam.z = 0;
+	iw->cam.z = 20;
 	iw->cam.rx = 0.174533f;
 	iw->cam.ry = 0.174533f;
 	//iw->cam.rz = 0;
@@ -140,9 +152,9 @@ void	get_scene1(t_rtv1 *iw)
 	iw->s.o[0].color = 0x00FF00;
 
 	tmp = (t_sphere *)malloc(sizeof(t_sphere));
-	tmp->x = 1;
+	tmp->x = 10;
 	tmp->y = 0;
-	tmp->z = 60;
+	tmp->z = 50;
 	tmp->r = 7;
 	iw->s.o[1].obj = (void *)tmp;
 	iw->s.o[1].type = 0;
@@ -150,10 +162,14 @@ void	get_scene1(t_rtv1 *iw)
 
 	iw->s.light_count = 1;
 	iw->s.l = (t_point_light *)malloc(iw->s.light_count * sizeof(t_point_light));
-	iw->s.l[0].x = 10;
-	iw->s.l[0].y = 10;
-	iw->s.l[0].z = 40;
-	iw->s.l[0].strength = 0.9f;
+	iw->s.l[0].x = 20;
+	iw->s.l[0].y = 20;
+	iw->s.l[0].z = 50;
+	iw->s.l[0].strength = 1.0f;
+	/*iw->s.l[1].x = -20;
+	iw->s.l[1].y = 0;
+	iw->s.l[1].z = 50;
+	iw->s.l[1].strength = 1.0f;*/
 }
 
 void	multiply_vector_and_rotation_matrix(t_rtv1 *iw, t_vector *v)
@@ -172,12 +188,12 @@ void	multiply_vector_and_rotation_matrix(t_rtv1 *iw, t_vector *v)
 
 float	get_sphere_len2(t_rtv1 *iw, t_variables1 *k, t_vector *d)
 {
-	k->p1.x = (float)iw->cam.x + k->t1 * d->x;
+	k->p1.x = ((float)iw->cam.x + k->t1 * d->x);
 	k->p1.y = (float)iw->cam.y + k->t1 * d->y;
-	k->p1.z = (float)iw->cam.z + k->t1 * d->z;
-	k->p2.x = (float)iw->cam.x + k->t2 * d->x;
+	k->p1.z = ((float)iw->cam.z + k->t1 * d->z);
+	k->p2.x = ((float)iw->cam.x + k->t2 * d->x);
 	k->p2.y = (float)iw->cam.y + k->t2 * d->y;
-	k->p2.z = (float)iw->cam.z + k->t2 * d->z;
+	k->p2.z = ((float)iw->cam.z + k->t2 * d->z);
 	k->len1 = sqrtf(powf((float)iw->cam.x - k->p1.x, 2.0f) + powf((float)iw->cam.y - k->p1.y, 2.0f)
 		+ powf((float)iw->cam.z - k->p1.z, 2.0f));
 	k->len2 = sqrtf(powf((float)iw->cam.x - k->p2.x, 2.0f) + powf((float)iw->cam.y - k->p2.y, 2.0f)
@@ -206,33 +222,59 @@ float	get_sphere_len(t_rtv1 *iw, t_sphere *sphere)
 		return (-1.0f);
 	k.t1 = (-k.k2 + sqrtf(discriminant)) / (2.0f * k.k1);
 	k.t2 = (-k.k2 - sqrtf(discriminant)) / (2.0f * k.k1);
-	if (k.t1 > -1.0f || k.t2 > -1.0f)
-		return (-1.0f);
+	/*if (k.t1 > -1.0f || k.t2 > -1.0f)
+		return (-1.0f);*/
 	get_sphere_len2(iw, &k, &d);
 	iw->p = (k.len1 < k.len2) ? k.p1 : k.p2;
+	iw->p.x = -iw->p.x + (float)(iw->cam.x * 2);
+	iw->p.y = iw->p.y - (float)(iw->cam.y * 2);
+	iw->p.z = -iw->p.z + (float)(iw->cam.z * 2);
+//	printf("px %f py %f pz %f\n", iw->p.x, iw->p.y, iw->p.z);
 	return ((k.len1 < k.len2) ? k.len1 : k.len2);
 }
 
-int		get_light_color(t_rtv1 *iw, int color)
+float	get_min_max_len(t_rtv1 *iw, int obj, float *maxlen, int light)
+{
+	float	minlen;
+
+	if (iw->s.o[obj].type == 0)
+	{
+		minlen = sqrtf(powf(((t_sphere *)iw->s.o[obj].obj)->x - iw->s.l[light].x, 2.0f) +
+			powf(((t_sphere *)iw->s.o[obj].obj)->y - iw->s.l[light].y, 2.0f) +
+			powf(((t_sphere *)iw->s.o[obj].obj)->z - iw->s.l[light].z, 2.0f));
+		//printf("radlen %f\n", minlen);
+		*maxlen = minlen + ((t_sphere *)iw->s.o[obj].obj)->r;
+		return (minlen - ((t_sphere *)iw->s.o[obj].obj)->r);
+	}
+}
+
+int		get_light_color(t_rtv1 *iw, int color, int obj)
 {
 	float	strength;
-	float	tmp;
+//	float	tmp;
 	float	len;
+	float	minlen;
+	float	maxlen;
 	int		i;
 
-	strength = 0.1f;
+	strength = 0.0f;
 	i = -1;
 	while (++i < iw->s.light_count)
 	{
+		minlen = get_min_max_len(iw, obj, &maxlen, i);
 		len = sqrtf(powf(iw->p.x - iw->s.l[i].x, 2.0f) + powf(iw->p.y - iw->s.l[i].y, 2.0f)
 			+ powf(iw->p.z - iw->s.l[i].z, 2.0f));
-		//printf("len %f\n", len);
-		tmp = iw->s.l[i].strength - (len / 1000.0f);
+		//printf("max %f min %f len %f\n", maxlen, minlen, len);
+		//printf("px %f, py %f, pz %f\n", iw->p.x, iw->p.y, iw->p.z);
+		strength += (maxlen - len) / (maxlen - minlen) * iw->s.l[i].strength;
+		/*tmp = iw->s.l[i].strength - (len / 1000.0f);
 		if (tmp > 0.0f)
-			strength += tmp;
+			strength += tmp;*/
 	}
+	if (strength < 0.1f) ////////
+		strength = 0.1f;
 	if (strength > 1.0f)
-		strength = 1.0f;
+		return(color);
 	i = (((int)((float)(color >> 16) * strength)) << 16) +
 		(((int)((float)((color >> 8) - (color >> 16 << 8)) * strength)) << 8)+
 		(int)((float)(color - (color >> 8 << 8)) * strength);
@@ -259,7 +301,7 @@ void	put_pixel_from_scene(t_rtv1 *iw)
 				if (len < minlen || minlen < 0.0f)
 				{
 					minlen = len;
-					color = get_light_color(iw, iw->s.o[i].color);//iw->s.o[i].color;
+					color = get_light_color(iw, iw->s.o[i].color, i);//iw->s.o[i].color;
 				}
 		}
 	}
@@ -324,6 +366,7 @@ int		main(void)
 	threads_draw(&iw);
 	SDL_UpdateWindowSurface(iw.win);
 	main_loop(&iw);
+	free_objects_lights(&iw);
 	SDL_FreeSurface(iw.sur);
 	SDL_DestroyWindow(iw.win);
 	SDL_Quit();
