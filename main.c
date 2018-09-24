@@ -135,6 +135,7 @@ void	get_scene1(t_rtv1 *iw)
 {
 	t_sphere		*tmp;
 	t_plane			*tmp2;
+	t_cylinder		*tmp3;
 
 	iw->cam.v.x = 0;
 	iw->cam.v.y = 0;
@@ -142,8 +143,7 @@ void	get_scene1(t_rtv1 *iw)
 	iw->cam.rx = 0.0f;
 	iw->cam.ry = 0.0f;
 	iw->cam.light = 0.1f;
-	//iw->cam.rz = 0;
-	iw->s.obj_count = 4;
+	iw->s.obj_count = 5;
 	iw->s.o = (t_objects *)malloc(iw->s.obj_count * sizeof(t_objects));
 	tmp = (t_sphere *)malloc(sizeof(t_sphere));
 	tmp->x = 0;
@@ -167,9 +167,9 @@ void	get_scene1(t_rtv1 *iw)
 	tmp2->p0.x = 0;
 	tmp2->p0.y = 25;
 	tmp2->p0.z = 0;
-	tmp2->n.x = 0;
-	tmp2->n.y = -1;
-	tmp2->n.z = 0;
+	tmp2->n.x = 0.0f;
+	tmp2->n.y = -1.0f;
+	tmp2->n.z = 0.0f;
 	iw->s.o[2].obj = (void *)tmp2;
 	iw->s.o[2].type = 1;
 	iw->s.o[2].color = 0xFFFF00;
@@ -178,68 +178,36 @@ void	get_scene1(t_rtv1 *iw)
 	tmp2->p0.x = 0;
 	tmp2->p0.y = 0;
 	tmp2->p0.z = 70;
-	tmp2->n.x = 0;
-	tmp2->n.y = 0;
-	tmp2->n.z = 1;
+	tmp2->n.x = 0.0f;
+	tmp2->n.y = sqrtf(1.0f);
+	tmp2->n.z = sqrtf(1.0f);
 	iw->s.o[3].obj = (void *)tmp2;
 	iw->s.o[3].type = 1;
 	iw->s.o[3].color = 0x0000FF;
 
-	/*tmp2 = (t_plane *)malloc(sizeof(t_plane));
-	tmp2->p0.x = -80;
-	tmp2->p0.y = 0;
-	tmp2->p0.z = 0;
-	tmp2->n.x = -1;
-	tmp2->n.y = 0;
-	tmp2->n.z = 0;
-	iw->s.o[4].obj = (void *)tmp2;
-	iw->s.o[4].type = 1;
-	iw->s.o[4].color = 0x0000FF;
+	tmp3 = (t_cylinder *)malloc(sizeof(t_cylinder));
+	tmp3->c.x = -10;
+	tmp3->c.y = 0;
+	tmp3->c.z = 30;
+	tmp3->v.x = 0.0f;
+	tmp3->v.y = 1.0f;
+	tmp3->v.z = 0.0f;
+	tmp3->r = 3;
+	iw->s.o[4].obj = (void *)tmp3;
+	iw->s.o[4].type = 2;
+	iw->s.o[4].color = 0xFF00FF;
 
-	tmp2 = (t_plane *)malloc(sizeof(t_plane));
-	tmp2->p0.x = 0;
-	tmp2->p0.y = 80;
-	tmp2->p0.z = 0;
-	tmp2->n.x = 0;
-	tmp2->n.y = 1;
-	tmp2->n.z = 0;
-	iw->s.o[5].obj = (void *)tmp2;
-	iw->s.o[5].type = 1;
-	iw->s.o[5].color = 0x00FFFF;
-
-	tmp2 = (t_plane *)malloc(sizeof(t_plane));
-	tmp2->p0.x = 0;
-	tmp2->p0.y = -80;
-	tmp2->p0.z = 0;
-	tmp2->n.x = 0;
-	tmp2->n.y = -1;
-	tmp2->n.z = 0;
-	iw->s.o[6].obj = (void *)tmp2;
-	iw->s.o[6].type = 1;
-	iw->s.o[6].color = 0x00FFFF;
-
-	tmp2 = (t_plane *)malloc(sizeof(t_plane));
-	tmp2->p0.x = 0;
-	tmp2->p0.y = 0;
-	tmp2->p0.z = -200;
-	tmp2->n.x = 0;
-	tmp2->n.y = 0;
-	tmp2->n.z = -1;
-	iw->s.o[7].obj = (void *)tmp2;
-	iw->s.o[7].type = 1;
-	iw->s.o[7].color = 0xFFFF00;*/
-
-	iw->s.light_count = 2;
+	iw->s.light_count = 1;
 	iw->s.l = (t_point_light *)malloc(iw->s.light_count * sizeof(t_point_light));
-	iw->s.l[0].v.x = 25;
+	iw->s.l[0].v.x = -25;
 	iw->s.l[0].v.y = -25;
 	iw->s.l[0].v.z = 35;
-	iw->s.l[0].strength = 0.9f;
+	iw->s.l[0].strength = 0.7f;
 
-	iw->s.l[1].v.x = -25;
+	/*iw->s.l[1].v.x = -25;
 	iw->s.l[1].v.y = -25;
 	iw->s.l[1].v.z = 35;
-	iw->s.l[1].strength = 0.9f;
+	iw->s.l[1].strength = 0.9f;*/
 	/*iw->s.l[1].v.x = -20;
 	iw->s.l[1].v.y = 0;
 	iw->s.l[1].v.z = 50;
@@ -309,8 +277,8 @@ float	get_plane_len(t_rtv1 *iw, t_plane *plane, t_vector *d, t_int_vector *v)
 	p0l0.x = -plane->p0.x + v->x;
 	p0l0.y = -plane->p0.y + v->y;
 	p0l0.z = -plane->p0.z + v->z;
-	t = (float)(-(p0l0.x * plane->n.x + p0l0.y * plane->n.y + p0l0.z * plane->n.z)) /
-		(float)(d->x * (float)plane->n.x + d->y * (float)plane->n.y + d->z * (float)plane->n.z);
+	t = (-((float)p0l0.x * plane->n.x + (float)p0l0.y * plane->n.y + (float)p0l0.z * plane->n.z)) /
+		(d->x * plane->n.x + d->y * plane->n.y + d->z * plane->n.z);
 	if (t < 0)
 		return (-1.0f);
 	iw->p.x = (float)v->x + d->x * t;
@@ -333,7 +301,48 @@ float	get_plane_len(t_rtv1 *iw, t_plane *plane, t_vector *d, t_int_vector *v)
 	// 	+powf((float)v->z - iw->p.z, 2.0f)));
 }
 
-int		get_light_object(t_rtv1 *iw, int light)
+float	get_cylinder_len2(t_rtv1 *iw, t_variables2 *k, t_vector *d, t_int_vector *v)
+{
+	k->p1.x = (float)v->x + k->t1 * d->x;
+	k->p1.y = (float)v->y + k->t1 * d->y;
+	k->p1.z = (float)v->z + k->t1 * d->z;
+	k->p2.x = (float)v->x + k->t2 * d->x;
+	k->p2.y = (float)v->y + k->t2 * d->y;
+	k->p2.z = (float)v->z + k->t2 * d->z;
+	k->len1 = sqrtf(powf((float)v->x - k->p1.x, 2.0f) + powf((float)v->y - k->p1.y, 2.0f)
+		+ powf((float)v->z - k->p1.z, 2.0f));
+	k->len2 = sqrtf(powf((float)v->x - k->p2.x, 2.0f) + powf((float)v->y - k->p2.y, 2.0f)
+		+ powf((float)v->z - k->p2.z, 2.0f));
+}
+
+float	get_cylinder_len(t_rtv1 *iw, t_cylinder *cyl, t_vector *d, t_int_vector *v)
+{
+	t_variables2	k;
+
+	k.oc.x = -cyl->c.x + v->x;
+	k.oc.y = -cyl->c.y + v->y;
+	k.oc.z = -cyl->c.z + v->z;
+	k.d_v = d->x * cyl->v.x + d->y * cyl->v.y + d->z * cyl->v.z;
+	k.oc_v = k.oc.x * cyl->v.x + k.oc.y * cyl->v.y + k.oc.z * cyl->v.z;
+	k.a = (d->x * d->x + d->y * d->y + d->z * d->z) -
+		k.d_v * k.d_v;
+	k.b = (d->x * k.oc.x + d->y * k.oc.y + d->z * k.oc.z) -
+		k.d_v * k.oc_v;
+	k.c = (k.oc.x * k.oc.x + k.oc.y * k.oc.y + k.oc.z * k.oc.z) -
+		k.oc_v * k.oc_v - (float)(cyl->r * cyl->r);
+	k.disk = k.b * k.b - k.a * k.c;
+	if (k.disk < 0.0f)
+		return (-1.0f);
+	k.t1 = (-k.b + sqrtf(k.disk)) / k.a;
+	k.t2 = (-k.b - sqrtf(k.disk)) / k.a;
+	if (k.t1 < 1.0f || k.t2 < 1.0f)
+		return (-1.0f);
+	get_cylinder_len2(iw, &k, d, v);
+	iw->p = (k.len1 < k.len2) ? k.p1 : k.p2;
+	return ((k.len1 < k.len2) ? k.len1 : k.len2);
+}
+
+int		get_light_object(t_rtv1 *iw, int light, int curr_obj)
 {
 	int			i;
 	int			obj;
@@ -347,15 +356,16 @@ int		get_light_object(t_rtv1 *iw, int light)
 	d.x = (iw->p.x - (float)iw->s.l[light].v.x) / minlen / 2.0f;
 	d.y = (iw->p.y - (float)iw->s.l[light].v.y) / minlen / 2.0f;
 	d.z = (iw->p.z - (float)iw->s.l[light].v.z) / minlen / 2.0f;
-	obj = -1;
-	minlen = -1.0f;
+	minlen += 0.1f;
+	obj = curr_obj;
+	//minlen = sqrtf(powf())//-1.0f;
 	i = -1;
 	while (++i < iw->s.obj_count)
 	{
 		if (iw->s.o[i].type == 0)
 		{
 			if ((len = get_sphere_len(iw, (t_sphere *)(iw->s.o[i].obj), &d, &(iw->s.l[light].v))) > 0.0f)
-				if (len < minlen || minlen < 0.0f)
+				if (len < minlen)
 				{
 					minlen = len;
 					obj = i;
@@ -364,7 +374,16 @@ int		get_light_object(t_rtv1 *iw, int light)
 		else if (iw->s.o[i].type == 1)
 		{
 			if ((len = get_plane_len(iw, (t_plane *)(iw->s.o[i].obj), &d, &(iw->s.l[light].v))) > 0.0f)
-				if (len < minlen || minlen < 0.0f)
+				if (len < minlen)
+				{
+					minlen = len;
+					obj = i;
+				}
+		}
+		else if (iw->s.o[i].type == 2)
+		{
+			if ((len = get_cylinder_len(iw, (t_cylinder *)(iw->s.o[i].obj), &d, &(iw->s.l[light].v))) > 0.0f)
+				if (len < minlen)
 				{
 					minlen = len;
 					obj = i;
@@ -383,9 +402,25 @@ float	get_min_max_len(t_rtv1 *iw, int obj, float *maxlen, int light)
 		minlen = sqrtf(powf(((t_sphere *)iw->s.o[obj].obj)->x - iw->s.l[light].v.x, 2.0f) +
 			powf(((t_sphere *)iw->s.o[obj].obj)->y - iw->s.l[light].v.y, 2.0f) +
 			powf(((t_sphere *)iw->s.o[obj].obj)->z - iw->s.l[light].v.z, 2.0f));
-		//printf("radlen %f\n", minlen);
 		*maxlen = minlen + ((t_sphere *)iw->s.o[obj].obj)->r;
 		return (minlen - ((t_sphere *)iw->s.o[obj].obj)->r);
+	}
+	else if (iw->s.o[obj].type == 2)
+	{
+		minlen = sqrtf(powf((((t_cylinder *)iw->s.o[obj].obj)->c.x - iw->s.l[light].v.x) *
+			((t_cylinder *)iw->s.o[obj].obj)->v.x, 2.0f) +
+			powf((((t_cylinder *)iw->s.o[obj].obj)->c.y - iw->s.l[light].v.y) *
+			((t_cylinder *)iw->s.o[obj].obj)->v.y, 2.0f) +
+			powf((((t_cylinder *)iw->s.o[obj].obj)->c.z - iw->s.l[light].v.z) *
+			((t_cylinder *)iw->s.o[obj].obj)->v.z, 2.0f)) /
+			sqrtf(powf(((t_cylinder *)iw->s.o[obj].obj)->v.x, 2.0f) +
+				powf(((t_cylinder *)iw->s.o[obj].obj)->v.y, 2.0f) +
+				powf(((t_cylinder *)iw->s.o[obj].obj)->v.z, 2.0f));
+		/*minlen = sqrtf(powf(((t_cylinder *)iw->s.o[obj].obj)->x - iw->s.l[light].v.x, 2.0f) +
+			powf(((t_sphere *)iw->s.o[obj].obj)->y - iw->s.l[light].v.y, 2.0f) +
+			powf(((t_sphere *)iw->s.o[obj].obj)->z - iw->s.l[light].v.z, 2.0f));*/
+		*maxlen = minlen + ((t_cylinder *)iw->s.o[obj].obj)->r;
+		return (minlen - ((t_cylinder *)iw->s.o[obj].obj)->r);
 	}
 }
 
@@ -401,7 +436,8 @@ int		get_light_color(t_rtv1 *iw, int color, int obj, t_vector p)
 	i = -1;
 	while (++i < iw->s.light_count)
 	{
-		if (get_light_object(iw, i) != obj)
+		iw->p = p;
+		if (get_light_object(iw, i, obj) != obj)
 			continue;
 		if (iw->s.o[obj].type == 1)
 		{
@@ -416,16 +452,6 @@ int		get_light_color(t_rtv1 *iw, int color, int obj, t_vector p)
 				strength += iw->s.l[i].strength;
 			len = sqrtf(powf(p.x - iw->s.l[i].v.x, 2.0f) + powf(p.y - iw->s.l[i].v.y, 2.0f)
 				+ powf(p.z - iw->s.l[i].v.z, 2.0f));
-			//p.x -= iw->cam.v.x;
-			//p.y -= iw->cam.v.y;
-			//p.z -= iw->cam.v.z;
-			//len = acosf((((t_plane *)(iw->s.o[obj].obj))->n.x * p.x + ((t_plane *)(iw->s.o[obj].obj))->n.y
-			//	* p.y + ((t_plane *)(iw->s.o[obj].obj))->n.z * p.z) /
-			//	(sqrtf(powf(((t_plane *)(iw->s.o[obj].obj))->n.x, 2.0f) + powf(((t_plane *)(iw->s.o[obj].obj))->n.y, 2.0f)/*sosi*/
-			//		+ powf(((t_plane *)(iw->s.o[obj].obj))->n.z, 2.0f)) *
-			//		sqrtf(powf(p.x, 2.0f) + powf(p.y, 2.0f) + powf(p.z, 2.0f))));
-			//if (fabsf(len) < 90.0f)
-
 		}
 		else
 		{
@@ -434,9 +460,9 @@ int		get_light_color(t_rtv1 *iw, int color, int obj, t_vector p)
 				+ powf(p.z - iw->s.l[i].v.z, 2.0f));
 			strength += (maxlen - len) / (maxlen - minlen) * iw->s.l[i].strength;
 		}
-		//`strength -= (len / 100.0f) * (1.0f - iw->s.l[i].strength);
+		strength -= (len / 500.0f) * (1.0f - iw->s.l[i].strength);
 	}
-	if (strength < iw->cam.light) ////////
+	if (strength < iw->cam.light)
 		strength = iw->cam.light;
 	if (strength > 1.0f)
 		return(color);
@@ -475,6 +501,15 @@ void	put_pixel_from_scene(t_rtv1 *iw)
 		else if (iw->s.o[i].type == 1)
 		{
 			if ((len = get_plane_len(iw, (t_plane *)(iw->s.o[i].obj), &d, &iw->cam.v)) > 0.0f)
+				if (len < minlen || minlen < 0.0f)
+				{
+					minlen = len;
+					color = get_light_color(iw, iw->s.o[i].color, i, iw->p);//iw->s.o[i].color;
+				}
+		}
+		else if (iw->s.o[i].type == 2)
+		{
+			if ((len = get_cylinder_len(iw, (t_cylinder *)(iw->s.o[i].obj), &d, &iw->cam.v)) > 0.0f)
 				if (len < minlen || minlen < 0.0f)
 				{
 					minlen = len;
