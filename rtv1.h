@@ -9,7 +9,7 @@
 # include <math.h>
 # define HAVE_STRUCT_TIMESPEC
 # include <pthread.h>
-# define WINDOW_W 300
+# define WINDOW_W 200
 # define WINDOW_H WINDOW_W
 # define THREADS 4
 # define CAMERA_FOV_DISTANCE 1
@@ -58,6 +58,17 @@ typedef struct	s_variables2
 	float		oc_v;
 }				t_variables2;
 
+typedef struct	s_get_light_color
+{
+	float	strength;
+	float	len;
+	int		i;
+	t_vector	sp;
+	t_vector	sn;
+	t_vector	l;
+	float		lenl;
+}				t_get_light_color;
+
 typedef struct	s_sphere
 {
 	int		x;
@@ -79,11 +90,18 @@ typedef struct	s_cylinder
 	int				r;
 }				t_cylinder;
 
+typedef struct	s_cone
+{
+	t_int_vector	c;
+	t_vector		v;
+	float			k; // tanf(alpha / 2)
+}				t_cone;
+
 typedef struct	s_objects
 {
 	void	*obj;
 	int		color;
-	char	type; // 0 - sphere, 1 - plane, 2 - cylinder
+	char	type; // 0 - sphere, 1 - plane, 2 - cylinder, 3 - cone
 }				t_objects;
 
 typedef struct	s_camera
@@ -128,5 +146,6 @@ typedef struct	s_rtv1
 	int			j;
 	int			color;
 	t_vector	p;
+	t_vector	n;
 }				t_rtv1;
 #endif
