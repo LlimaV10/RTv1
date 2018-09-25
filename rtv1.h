@@ -1,15 +1,15 @@
 #ifndef __RTV1
 # define __RTV1
 
-//# include "SDL2/SDL2.framework/Headers/SDL.h"
-# include <SDL.h>
+# include "SDL2/SDL2.framework/Headers/SDL.h"
+//# include <SDL.h>
 # include <stdlib.h>
 //# include <unistd.h>
 # include <fcntl.h>
 # include <math.h>
-# define HAVE_STRUCT_TIMESPEC
+//# define HAVE_STRUCT_TIMESPEC
 # include <pthread.h>
-# define WINDOW_W 200
+# define WINDOW_W 400
 # define WINDOW_H WINDOW_W
 # define THREADS 4
 # define CAMERA_FOV_DISTANCE 1
@@ -61,7 +61,6 @@ typedef struct	s_variables2
 typedef struct	s_get_light_color
 {
 	float	strength;
-	float	len;
 	int		i;
 	t_vector	sp;
 	t_vector	sn;
@@ -133,11 +132,17 @@ typedef struct	s_scene
 	t_point_light	*l;
 }				t_scene;
 
+typedef struct	s_flags
+{
+	int		sel;
+}				t_flags;
+
 typedef struct	s_rtv1
 {
 	SDL_Window	*win;
 	SDL_Surface	*sur;
 	char		quit;
+	t_flags		f;
 	t_camera	cam;
 	t_scene		s;
 	int			i;
