@@ -687,6 +687,270 @@ void	threads_draw(t_rtv1 *iw)
 		pthread_join(threads[i], (void **)&iws[i]);
 }
 
+int		split_len(char **s)
+{
+	int		i;
+
+	if (s == 0)
+		return (0);
+	i = 0;
+	while (*s != 0)
+	{
+		i++;
+		s++;
+	}
+	return (i);
+}
+
+int		free_spl(char **spl, char *s)
+{
+	if (s == 0)
+		return (0);
+	free(s);
+	if (spl == 0)
+		return (0);
+	while (*spl != 0)
+	{
+		free(*spl);
+		spl++;
+	}
+	free(spl);
+	return (0);
+}
+
+int		add_sphere(char **spl, int spl_len, t_rtv1 *iw, int obj)
+{
+	t_sphere	*tmp;
+
+	if (spl_len != 6)
+		return (0);
+	if (spl[5][0] != '0' || spl[5][1] != 'x')
+		return (0);
+	tmp = (t_sphere *)malloc(sizeof(t_sphere));
+	tmp->x = ft_atoi(spl[1]);
+	tmp->y = ft_atoi(spl[2]);
+	tmp->z = ft_atoi(spl[3]);
+	tmp->r = ft_atoi(spl[4]);
+	iw->s.o[obj].type = 0;
+	iw->s.o[obj].color = 0xFFFFFF;/////////////spl[5]
+	iw->s.o[obj].obj = (void *)tmp;
+	return (1);
+}
+
+int		add_plane(char **spl, int spl_len, t_rtv1 *iw, int obj)
+{
+	t_plane	*tmp;
+	float	vlen;
+
+	if (spl_len != 8)
+		return (0);
+	if (spl[7][0] != '0' || spl[7][1] != 'x')
+		return (0);
+	tmp = (t_plane *)malloc(sizeof(t_plane));
+	tmp->p0.x = ft_atoi(spl[1]);
+	tmp->p0.y = ft_atoi(spl[2]);
+	tmp->p0.z = ft_atoi(spl[3]);
+	tmp->n.x = (float)ft_atoi(spl[4]);
+	tmp->n.y = (float)ft_atoi(spl[5]);
+	tmp->n.z = (float)ft_atoi(spl[6]);
+	vlen = sqrtf(tmp->n.x * tmp->n.x + tmp->n.y * tmp->n.y +
+		tmp->n.z * tmp->n.z);
+	tmp->n.x /= vlen;
+	tmp->n.y /= vlen;
+	tmp->n.z /= vlen;
+	iw->s.o[obj].type = 1;
+	iw->s.o[obj].color = 0xFFFFFF;/////////////spl[7]
+	iw->s.o[obj].obj = (void *)tmp;
+	return (1);
+}
+
+int		add_cylinder(char **spl, int spl_len, t_rtv1 *iw, int obj)
+{
+	t_cylinder	*tmp;
+	float		vlen;
+
+	if (spl_len != 9)
+		return (0);
+	if (spl[8][0] != '0' || spl[8][1] != 'x')
+		return (0);
+	tmp = (t_cylinder *)malloc(sizeof(t_cylinder));
+	tmp->c.x = ft_atoi(spl[1]);
+	tmp->c.y = ft_atoi(spl[2]);
+	tmp->c.z = ft_atoi(spl[3]);
+	tmp->v.x = (float)ft_atoi(spl[4]);
+	tmp->v.y = (float)ft_atoi(spl[5]);
+	tmp->v.z = (float)ft_atoi(spl[6]);
+	vlen = sqrtf(tmp->v.x * tmp->v.x + tmp->v.y * tmp->v.y +
+		tmp->v.z * tmp->v.z);
+	tmp->v.x /= vlen;
+	tmp->v.y /= vlen;
+	tmp->v.z /= vlen;
+	tmp->r = ft_atoi(spl[7]);
+	iw->s.o[obj].type = 2;
+	iw->s.o[obj].color = 0xFFFFFF;/////////////spl[8]
+	iw->s.o[obj].obj = (void *)tmp;
+	return (1);
+}
+
+int		add_cone(char **spl, int spl_len, t_rtv1 *iw, int obj)
+{
+	t_cone	*tmp;
+	float		vlen;
+
+	if (spl_len != 9)
+		return (0);
+	if (spl[8][0] != '0' || spl[8][1] != 'x')
+		return (0);
+	tmp = (t_cone *)malloc(sizeof(t_cone));
+	tmp->c.x = ft_atoi(spl[1]);
+	tmp->c.y = ft_atoi(spl[2]);
+	tmp->c.z = ft_atoi(spl[3]);
+	tmp->v.x = (float)ft_atoi(spl[4]);
+	tmp->v.y = (float)ft_atoi(spl[5]);
+	tmp->v.z = (float)ft_atoi(spl[6]);
+	vlen = sqrtf(tmp->v.x * tmp->v.x + tmp->v.y * tmp->v.y +
+		tmp->v.z * tmp->v.z);
+	tmp->v.x /= vlen;
+	tmp->v.y /= vlen;
+	tmp->v.z /= vlen;
+	tmp->k = (float)ft_atoi(spl[7]) * 0.0174533f;
+	iw->s.o[obj].type = 3;
+	iw->s.o[obj].color = 0xFFFFFF;/////////////spl[8]
+	iw->s.o[obj].obj = (void *)tmp;
+	return (1);
+}
+
+int		get_objects(int fd, int count, t_rtv1 *iw)
+{
+	char	*s;
+	char	**spl;
+	int		spl_len;
+	int		i;
+	int		ret;
+
+	if (count < 1 || count > 10)
+		return (0);
+	iw->s.obj_count = count;
+	iw->s.o = (t_objects *)malloc(count * sizeof(t_objects));
+	i = -1;
+	while (++i < count)
+	{
+		if (get_next_line(fd, &s) < 0)
+			return (0);
+		spl = ft_strsplit(s, ' ');
+		spl_len = split_len(spl);
+		if (spl_len < 1)
+			return (free_spl(spl, s));
+		if (ft_strcmp(*spl, "sphere:") == 0)
+			ret = add_sphere(spl, spl_len, iw, i);
+		else if (ft_strcmp(*spl, "plane:") == 0)
+			ret = add_plane(spl, spl_len, iw, i);
+		else if (ft_strcmp(*spl, "cylinder:") == 0)
+			ret = add_cylinder(spl, spl_len, iw, i);
+		else if (ft_strcmp(*spl, "cone:") == 0)
+			ret = add_cone(spl, spl_len, iw, i);
+		else
+			return (free_spl(spl, s));
+		free_spl(spl, s);
+		if (ret == 0)
+			return (0);
+	}
+	return (1);
+}
+
+int		get_lights(int fd, int count, t_rtv1 *iw)
+{
+	char	*s;
+	char	**spl;
+	int		spl_len;
+	int		i;
+
+	if (count < 1 || count > 5)
+		return (0);
+	iw->s.light_count = count;
+	iw->s.l = (t_point_light *)malloc(count * sizeof(t_point_light));
+	i = -1;
+	while (++i < count)
+	{
+		if (get_next_line(fd, &s) < 0)
+			return (0);
+		spl = ft_strsplit(s, ' ');
+		spl_len = split_len(spl);
+		if (spl_len != 4)
+			return (free_spl(spl, s));
+		iw->s.l[i].v.x = ft_atoi(spl[0]);
+		iw->s.l[i].v.y = ft_atoi(spl[1]);
+		iw->s.l[i].v.z = ft_atoi(spl[2]);
+		iw->s.l[i].strength = (float)ft_atoi(spl[3]) / 1000.0f;
+	}
+	return (1);
+}
+
+int		get_map(t_rtv1 *iw, const char *name)
+{
+	char	*s;
+	char	**spl;
+	int		fd;
+	int		spl_len;
+	int		get;
+
+	if ((fd = open(name, "O_RDONLY")) < 0)
+		return (0);
+	if (get_next_line(fd, &s) < 0)
+		return (0);
+	spl = ft_strsplit(s, ' ');
+	spl_len = split_len(spl);
+	if (spl_len < 1)
+		return (free_spl(spl, s));
+	if (ft_strcmp(*spl, "camera:") == 0)
+	{
+		if (spl_len != 7)
+			return (0);
+		iw->cam.v.x = ft_atoi(spl[1]);
+		iw->cam.v.y = ft_atoi(spl[2]);
+		iw->cam.v.z = ft_atoi(spl[3]);
+		iw->cam.rx = (float)ft_atoi(spl[4]) * 0.0174533f;
+		iw->cam.ry = (float)ft_atoi(spl[5]) * 0.0174533f;
+		iw->cam.light = (float)ft_atoi(spl[6]) / 1000.0f;
+		free_spl(spl, s);
+		if (get_next_line(fd, &s) < 0)
+			return (0);
+		spl = ft_strsplit(s, ' ');
+		spl_len = split_len(spl);
+		if (spl_len < 1)
+			return (free_spl(spl, s));
+	}
+	else
+	{
+		iw->cam.v.x = 0;
+		iw->cam.v.y = 0;
+		iw->cam.v.z = 0;
+		iw->cam.rx = 0.0f;
+		iw->cam.ry = 0.0f;
+		iw->cam.light = 0.1f;
+	}
+	if ((ft_strcmp(*spl, "objects:") == 0) &&
+		(spl_len == 2) && (get_objects(fd, ft_atoi(spl[1]), iw) != 0))
+	{
+		free_spl(spl, s);
+		if (get_next_line(fd, &s) < 0)
+		{
+			iw->s.light_count = 0;
+			return (1);
+		}
+		spl = ft_strsplit(s, ' ');
+		spl_len = split_len(spl);
+		get_lights(fd, ft_atoi(spl[1]), iw);
+	}
+	else
+	{
+		free_objects_lights(iw);
+		return(free_spl(spl, s));
+	}
+
+	return (1);
+}
+
 int		main(void)
 {
 	t_rtv1	iw;
@@ -696,7 +960,8 @@ int		main(void)
 	iw.win = SDL_CreateWindow("RTv1", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 		WINDOW_W, WINDOW_H, SDL_WINDOW_SHOWN);
 	iw.sur = SDL_GetWindowSurface(iw.win);
-	get_scene1(&iw);
+	//get_scene1(&iw);
+	get_map(&iw, "maps/map1");
 	threads_draw(&iw);
 	SDL_UpdateWindowSurface(iw.win);
 	main_loop(&iw);
