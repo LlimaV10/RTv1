@@ -19,8 +19,10 @@ void	free_objects_lights(t_rtv1 *iw)
 	i = -1;
 	while (++i < iw->s.obj_count)
 		free(iw->s.o[i].obj);
-	free(iw->s.o);
-	free(iw->s.l);
+	if (iw->s.o)
+		free(iw->s.o);
+	if (iw->s.l)
+		free(iw->s.l);
 }
 
 void	exit_x(t_rtv1 *iw)
@@ -702,20 +704,30 @@ int		split_len(char **s)
 	return (i);
 }
 
-int		free_spl(char **spl, char *s)
+int		exit_map(int fd)
 {
+	if (fd != 0)
+		close(fd);
+	return (0);
+}
+
+int		free_spl(char **spl, char *s, int fd)
+{
+	char	**tmp;
+
 	if (s == 0)
 		return (0);
 	free(s);
 	if (spl == 0)
 		return (0);
+	tmp = spl;
 	while (*spl != 0)
 	{
 		free(*spl);
 		spl++;
 	}
-	free(spl);
-	return (0);
+	free(tmp);
+	return (exit_map(fd));
 }
 
 int		add_sphere(char **spl, int spl_len, t_rtv1 *iw, int obj)
@@ -835,12 +847,12 @@ int		get_objects(int fd, int count, t_rtv1 *iw)
 	i = -1;
 	while (++i < count)
 	{
-		if (get_next_line(fd, &s) < 0)
+		if (get_next_line(fd, &s) <= 0)
 			return (0);
 		spl = ft_strsplit(s, ' ');
 		spl_len = split_len(spl);
 		if (spl_len < 1)
-			return (free_spl(spl, s));
+			return (free_spl(spl, s, 0));
 		if (ft_strcmp(*spl, "sphere:") == 0)
 			ret = add_sphere(spl, spl_len, iw, i);
 		else if (ft_strcmp(*spl, "plane:") == 0)
@@ -850,8 +862,8 @@ int		get_objects(int fd, int count, t_rtv1 *iw)
 		else if (ft_strcmp(*spl, "cone:") == 0)
 			ret = add_cone(spl, spl_len, iw, i);
 		else
-			return (free_spl(spl, s));
-		free_spl(spl, s);
+			return (free_spl(spl, s, 0));
+		free_spl(spl, s, 0);
 		if (ret == 0)
 			return (0);
 	}
@@ -872,12 +884,12 @@ int		get_lights(int fd, int count, t_rtv1 *iw)
 	i = -1;
 	while (++i < count)
 	{
-		if (get_next_line(fd, &s) < 0)
+		if (get_next_line(fd, &s) <= 0)
 			return (0);
 		spl = ft_strsplit(s, ' ');
 		spl_len = split_len(spl);
 		if (spl_len != 4)
-			return (free_spl(spl, s));
+			return (free_spl(spl, s, 0));
 		iw->s.l[i].v.x = ft_atoi(spl[0]);
 		iw->s.l[i].v.y = ft_atoi(spl[1]);
 		iw->s.l[i].v.z = ft_atoi(spl[2]);
@@ -894,14 +906,15 @@ int		get_map(t_rtv1 *iw, const char *name)
 	int		spl_len;
 	int		get;
 
-	if ((fd = open(name, "O_RDONLY")) < 0)
+	fd = 0;
+	if ((fd = open(name, O_RDONLY)) < 0)
 		return (0);
-	if (get_next_line(fd, &s) < 0)
-		return (0);
+	if (get_next_line(fd, &s) <= 0)
+		return (exit_map(fd));
 	spl = ft_strsplit(s, ' ');
 	spl_len = split_len(spl);
 	if (spl_len < 1)
-		return (free_spl(spl, s));
+		return (free_spl(spl, s, fd));
 	if (ft_strcmp(*spl, "camera:") == 0)
 	{
 		if (spl_len != 7)
@@ -912,13 +925,13 @@ int		get_map(t_rtv1 *iw, const char *name)
 		iw->cam.rx = (float)ft_atoi(spl[4]) * 0.0174533f;
 		iw->cam.ry = (float)ft_atoi(spl[5]) * 0.0174533f;
 		iw->cam.light = (float)ft_atoi(spl[6]) / 1000.0f;
-		free_spl(spl, s);
-		if (get_next_line(fd, &s) < 0)
+		free_spl(spl, s, 0);
+		if (get_next_line(fd, &s) <= 0)
 			return (0);
 		spl = ft_strsplit(s, ' ');
 		spl_len = split_len(spl);
 		if (spl_len < 1)
-			return (free_spl(spl, s));
+			return (free_spl(spl, s, fd));
 	}
 	else
 	{
@@ -932,8 +945,8 @@ int		get_map(t_rtv1 *iw, const char *name)
 	if ((ft_strcmp(*spl, "objects:") == 0) &&
 		(spl_len == 2) && (get_objects(fd, ft_atoi(spl[1]), iw) != 0))
 	{
-		free_spl(spl, s);
-		if (get_next_line(fd, &s) < 0)
+		free_spl(spl, s, 0);
+		if (get_next_line(fd, &s) <= 0)
 		{
 			iw->s.light_count = 0;
 			return (1);
@@ -943,11 +956,8 @@ int		get_map(t_rtv1 *iw, const char *name)
 		get_lights(fd, ft_atoi(spl[1]), iw);
 	}
 	else
-	{
-		free_objects_lights(iw);
-		return(free_spl(spl, s));
-	}
-
+		return(free_spl(spl, s, fd));
+	free_spl(spl, s, fd);
 	return (1);
 }
 
@@ -955,19 +965,29 @@ int		main(void)
 {
 	t_rtv1	iw;
 
-	SDL_Init(SDL_INIT_EVERYTHING);
-	//SDL_SetRelativeMouseMode(0);
-	iw.win = SDL_CreateWindow("RTv1", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-		WINDOW_W, WINDOW_H, SDL_WINDOW_SHOWN);
-	iw.sur = SDL_GetWindowSurface(iw.win);
 	//get_scene1(&iw);
-	get_map(&iw, "maps/map1");
-	threads_draw(&iw);
-	SDL_UpdateWindowSurface(iw.win);
-	main_loop(&iw);
+	iw.s.o = 0;
+	iw.s.l = 0;
+	iw.s.light_count = 0;
+	iw.s.obj_count = 0;
+	/*if (get_map(&iw, "maps/map1") == 0)
+		write(1, "Error\n", 6);
+	else
+	{*/
+		SDL_Init(SDL_INIT_EVERYTHING);
+		//SDL_SetRelativeMouseMode(0);
+		iw.win = SDL_CreateWindow("RTv1", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+			WINDOW_W, WINDOW_H, SDL_WINDOW_SHOWN);
+		iw.sur = SDL_GetWindowSurface(iw.win);
+		get_scene1(&iw);
+		threads_draw(&iw);
+		SDL_UpdateWindowSurface(iw.win);
+		main_loop(&iw);
+		SDL_FreeSurface(iw.sur);
+		SDL_DestroyWindow(iw.win);
+		SDL_Quit();
+	//}
 	free_objects_lights(&iw);
-	SDL_FreeSurface(iw.sur);
-	SDL_DestroyWindow(iw.win);
-	SDL_Quit();
+	system("PAUSE");
 	return (0);
 }
