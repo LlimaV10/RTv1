@@ -1,20 +1,20 @@
 #ifndef __RTV1
 # define __RTV1
 
-# include "SDL2/SDL2.framework/Headers/SDL.h"
-//# define _CRT_SECURE_NO_WARNINGS
+//# include "SDL2/SDL2.framework/Headers/SDL.h"
+# define _CRT_SECURE_NO_WARNINGS
 # include "libft/libft.h"
-//# include <SDL.h>
+# include <SDL.h>
 # include <stdlib.h>
-# include <unistd.h>
-//# include <io.h>
+//# include <unistd.h>
+# include <io.h>
 # include <fcntl.h>
-// # define read _read
-// # define write _write
-// # define open _open
-// # define close _close
+# define read _read
+# define write _write
+# define open _open
+# define close _close
 # include <math.h>
-//# define HAVE_STRUCT_TIMESPEC
+# define HAVE_STRUCT_TIMESPEC
 # include <pthread.h>
 # define WINDOW_W 400
 # define WINDOW_H WINDOW_W

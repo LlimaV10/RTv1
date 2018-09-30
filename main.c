@@ -1,4 +1,5 @@
 #include "rtv1.h"
+#include <stdio.h>
 
 void	set_pixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
 {
@@ -449,7 +450,7 @@ float	get_cylinder_len(t_rtv1 *iw, t_cylinder *cyl,
 	k.oc.z = (float)(-cyl->c.z + v->z);
 	k.d_v = d->x * cyl->v.x + d->y * cyl->v.y + d->z * cyl->v.z;
 	k.oc_v = k.oc.x * cyl->v.x + k.oc.y * cyl->v.y + k.oc.z * cyl->v.z;
-	if (get_cylinder_len_n(cyl, d, &k) < 0 || k.t1 < 1.0f || k.t2 < 1.0f)
+	if (get_cylinder_len_n(cyl, d, &k) < 0 || (k.t1 < 1.0f && k.t2 < 1.0f))
 		return (-1.0f);
 	get_cylinder_len2(&k, d, v);
 	iw->p = (k.len1 < k.len2) ? k.p1 : k.p2;
@@ -495,11 +496,13 @@ float	get_cone_len(t_rtv1 *iw, t_cone *cone, t_vector *d, t_int_vector *v)
 	k.d_v = d->x * cone->v.x + d->y * cone->v.y + d->z * cone->v.z;
 	k.oc_v = k.oc.x * cone->v.x + k.oc.y * cone->v.y + k.oc.z * cone->v.z;
 	k2p1 = cone->k * cone->k + 1.0f;
-	if (get_cone_len_n(d, &k, k2p1) < 0 || k.t1 < 1.0f || k.t2 < 1.0f)
+	if (get_cone_len_n(d, &k, k2p1) < 0 || (k.t1 < 1.0f && k.t2 < 1.0f))
 		return (-1.0f);
 	get_cylinder_len2(&k, d, v);
-	iw->p = (k.len1 < k.len2) ? k.p1 : k.p2;
-	m = k.d_v * ((k.len1 < k.len2) ? k.t1 : k.t2) + k.oc_v;
+	iw->p = (k.t1 < 1.0f) ? k.p2 : ((k.t2 < 1.0f) ? k.p1 : ((k.len1 < k.len2) ? k.p1 : k.p2));
+	//iw->p = (k.len1 < k.len2) ? k.p1 : k.p2;
+	m = k.d_v * ((k.t1 < 1.0f) ? k.t2 : ((k.t2 < 1.0f) ? k.t1
+		: ((k.len1 < k.len2) ? k.t1 : k.t2))) + k.oc_v;
 	iw->n.x = iw->p.x - (float)cone->c.x - k2p1 * cone->v.x * m;
 	iw->n.y = iw->p.y - (float)cone->c.y - k2p1 * cone->v.y * m;
 	iw->n.z = iw->p.z - (float)cone->c.z - k2p1 * cone->v.z * m;
@@ -634,6 +637,11 @@ void	put_pixel_from_scene(t_rtv1 *iw)
 	d.y = (float)((iw->j - WINDOW_H / 2) * CAMERA_FOV_DISTANCE) / (float)WINDOW_H;
 	d.z = (float)(CAMERA_FOV_DISTANCE);
 	multiply_vector_and_rotation_matrix(iw, &d);
+	minlen = sqrtf(powf(d.x, 2.0f) + powf(d.y, 2.0f) + powf(d.z, 2.0f));
+	d.x /= minlen;
+	d.y /= minlen;
+	d.z /= minlen;
+	//printf("%f\n", sqrtf(powf(d.x, 2.0f) + powf(d.y, 2.0f) + powf(d.z, 2.0f)));
 	color = 0;
 	minlen = -1.0f;
 	i = -1;
@@ -846,7 +854,8 @@ int		add_cone(char **spl, int spl_len, t_rtv1 *iw, int obj)
 	tmp->v.x /= vlen;
 	tmp->v.y /= vlen;
 	tmp->v.z /= vlen;
-	tmp->k = (float)ft_atoi(spl[7]) * 0.0174533f;
+	tmp->k = tanf((float)ft_atoi(spl[7]) * 0.0174533f);
+	printf("k %f %f\n", tmp->k, atanf(tmp->k));
 	iw->s.o[obj].type = 3;
 	iw->s.o[obj].color = atoi_16(spl[8] + 1);//0xFFFFFF;/////////////spl[8]
 	iw->s.o[obj].obj = (void *)tmp;
