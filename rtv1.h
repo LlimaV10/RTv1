@@ -1,22 +1,22 @@
 #ifndef __RTV1
 # define __RTV1
 
-//# include "SDL2/SDL2.framework/Headers/SDL.h"
-# define _CRT_SECURE_NO_WARNINGS
+# include "SDL2/SDL2.framework/Headers/SDL.h"
+//# define _CRT_SECURE_NO_WARNINGS
 # include "libft/libft.h"
-# include <SDL.h>
+//# include <SDL.h>
 # include <stdlib.h>
-//# include <unistd.h>
-# include <io.h>
+# include <unistd.h>
+//# include <io.h>
 # include <fcntl.h>
-# define read _read
-# define write _write
-# define open _open
-# define close _close
+// # define read _read
+// # define write _write
+// # define open _open
+// # define close _close
 # include <math.h>
-# define HAVE_STRUCT_TIMESPEC
+//# define HAVE_STRUCT_TIMESPEC
 # include <pthread.h>
-# define WINDOW_W 200
+# define WINDOW_W 400
 # define WINDOW_H WINDOW_W
 # define THREADS 4
 # define CAMERA_FOV_DISTANCE 1
@@ -44,6 +44,7 @@ typedef struct	s_variables1
 	float		t2;
 	float		len1;
 	float		len2;
+	t_vector	oc;
 	t_vector	p1;
 	t_vector	p2;
 }				t_variables1;
@@ -113,13 +114,9 @@ typedef struct	s_objects
 typedef struct	s_camera
 {
 	t_int_vector	v;
-	/*int		x;
-	int		y;
-	int		z;*/
 	float	rx;
 	float	ry;
 	float	light;
-	//float	rz;
 }				t_camera;
 
 typedef struct	s_point_light
@@ -160,4 +157,40 @@ typedef struct	s_rtv1
 	t_vector	p;
 	t_vector	n;
 }				t_rtv1;
+
+void	set_pixel(SDL_Surface *surface, int x, int y, Uint32 pixel);
+void	free_objects_lights(t_rtv1 *iw);
+void	exit_x(t_rtv1 *iw);
+void	update_int(t_rtv1 *iw, int *change, int i);
+void	update_float(t_rtv1 *iw, float *change, float i);
+void	update_vector(t_rtv1 *iw, int bol, float i);
+void	update_move_selected_y(t_rtv1 *iw, int i);
+void	update_move_selected_x(t_rtv1 *iw, int i);
+void	update_move_selected_z(t_rtv1 *iw, int i);
+void	key_down(int code, t_rtv1 *iw);
+void	select_object(t_rtv1 *iw, int x, int y);
+void	main_loop(t_rtv1 *iw);
+void	multiply_vector_and_rotation_matrix(t_rtv1 *iw, t_vector *v);
+void	get_sphere_len2(t_variables1 *k, t_vector *d, t_int_vector *v);
+float	get_sphere_len(t_rtv1 *iw, t_sphere *sphere, t_vector *d, t_int_vector *v);
+float	get_plane_len(t_rtv1 *iw, t_plane *plane, t_vector *d, t_int_vector *v);
+void	get_cylinder_len2(t_variables2 *k, t_vector *d, t_int_vector *v);
+float	get_cylinder_len(t_rtv1 *iw, t_cylinder *cyl, t_vector *d, t_int_vector *v);
+float	get_cone_len(t_rtv1 *iw, t_cone *cone, t_vector *d, t_int_vector *v);
+int		get_light_object(t_rtv1 *iw, int light, int curr_obj);
+int		get_light_color(t_rtv1 *iw, int color, int obj);
+void	put_pixel_from_scene(t_rtv1 *iw);
+int		threads_draw2(t_rtv1 *iw);
+void	threads_draw(t_rtv1 *iw);
+int		split_len(char **s);
+int		exit_map(int fd);
+int		free_spl(char **spl, char *s, int fd);
+int		atoi_16(char *s);
+int		add_sphere(char **spl, int spl_len, t_rtv1 *iw, int obj);
+int		add_plane(char **spl, int spl_len, t_rtv1 *iw, int obj);
+int		add_cylinder(char **spl, int spl_len, t_rtv1 *iw, int obj);
+int		add_cone(char **spl, int spl_len, t_rtv1 *iw, int obj);
+int		get_objects(int fd, int count, t_rtv1 *iw);
+int		get_lights(int fd, int count, t_rtv1 *iw);
+int		get_map(t_rtv1 *iw, const char *name);
 #endif

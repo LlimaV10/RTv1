@@ -1,0 +1,9 @@
+camera: 50 0 -50 0 -30 200
+objects: 4
+sphere: 0 0 20 7 0x00FF00
+plane: 0 20 0 0 1 0 0x00FF00
+cylinder: -50 0 20 -1 -1 0 4 0x5000FF
+cone: 50 -20 20 1 -1 0 15 0x00AAFF
+lights: 1
+100 -20 10 600
+-100 -20 10 600
