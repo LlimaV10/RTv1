@@ -12,7 +12,17 @@
 
 NAME = RTv1
 
-SRC = main.c
+SRC =	SRC/main.c \
+		SRC/get_map1.c \
+		SRC/get_map2.c \
+		SRC/get_map_objects.c \
+		SRC/draw1.c \
+		SRC/light.c \
+		SRC/ray_objects.c \
+		SRC/ray_objects2.c \
+		SRC/sdl_loop.c \
+		SRC/update1.c \
+		SRC/update2.c
 
 OBJ = $(SRC:.c=.o)
 
@@ -53,6 +63,6 @@ fclean: clean
 re: fclean \
 	all
 
-.PHONY: all clean fclean re libft1
+.PHONY: all clean fclean re
 
-.NOTPARALLEL: all clean fclean re libft1
+.NOTPARALLEL: all clean fclean re
