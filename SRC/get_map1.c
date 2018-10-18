@@ -67,9 +67,10 @@ int		get_map_objects(t_rtv1 *iw, int fd, t_get_map *t)
 		}
 		t->spl = ft_strsplit(t->s, ' ');
 		t->spl_len = split_len(t->spl);
-		if (t->spl_len != 2 || ft_strcmp("lights:", t->spl[0]) != 0
-			|| get_lights(fd, ft_atoi(t->spl[1]), iw) == 0)
-			return (free_spl(t->spl, t->s, fd));
+		if (t->spl_len != 0)
+			if (t->spl_len != 2 || ft_strcmp("lights:", t->spl[0]) != 0
+				|| get_lights(fd, ft_atoi(t->spl[1]), iw) == 0)
+				return (free_spl(t->spl, t->s, fd));
 	}
 	else
 		return (free_spl(t->spl, t->s, fd));

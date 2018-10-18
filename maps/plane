@@ -1,0 +1,5 @@
+camera: 0 -50 -50 -20 0 100
+objects: 1
+plane: 0 0 0 0 1 0 0x00FF00
+lights: 1
+50 -100 30 600
